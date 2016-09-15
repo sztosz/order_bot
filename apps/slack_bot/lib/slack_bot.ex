@@ -10,6 +10,7 @@ defmodule SlackBot do
     children = [
       # Starts a worker by calling: SlackBot.Worker.start_link(arg1, arg2, arg3)
       # worker(SlackBot.Worker, [arg1, arg2, arg3]),
+      worker(SlackBot.Bot, [Application.get_env(:slack_bot, :token)])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
