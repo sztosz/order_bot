@@ -29,6 +29,7 @@ defmodule SlackBot.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:slack, "~> 0.7.0"},
+     {:happy, "~> 1.3.1"},
      {:websocket_client, git: "https://github.com/jeremyong/websocket_client"}]
   end
 end

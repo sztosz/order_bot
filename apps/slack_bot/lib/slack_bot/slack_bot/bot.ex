@@ -1,15 +1,18 @@
 defmodule SlackBot.Bot do
+  @moduledoc false
+
   use Slack
 
+  alias SlackBot.Order
+
   def handle_message(%{type: "message", text: "$ " <> "add " <> order} = message, slack) do
-    case String.split(order) do
-      [article, quantity, measure_unit] ->
-        {_, response} = SlackBot.Order.add(article, quantity, measure_unit)
+    case Order.add(order) do
+      :ok ->
+        send_message("Ok, Jose!", message.channel, slack)
+      {:error, response} ->
         send_message(response, message.channel, slack)
-      [_ | _] ->
-        send_message("I did not understand", message.channel, slack)
     end
   end
 
-  def handle_message(message, _), do: :ok
+  def handle_message(_, _), do: :ok
 end
