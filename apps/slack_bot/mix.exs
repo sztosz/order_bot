@@ -3,7 +3,7 @@ defmodule SlackBot.Mixfile do
 
   def project do
     [app: :slack_bot,
-     version: "0.1.0",
+     version: "0.0.1",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -14,7 +14,7 @@ defmodule SlackBot.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger],
+    [applications: [:logger, :slack],
      mod: {SlackBot, []}]
   end
 
@@ -28,6 +28,8 @@ defmodule SlackBot.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:slack, "~> 0.7.0"},
+     {:happy, "~> 1.3.1"},
+     {:websocket_client, git: "https://github.com/jeremyong/websocket_client"}]
   end
 end

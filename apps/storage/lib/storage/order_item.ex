@@ -1,8 +1,12 @@
 defmodule Storage.OrderItem do
+  @moduledoc false
+
   use Ecto.Schema
 
+  alias Ecto.Changeset
+
   schema "order_items" do
-    field :name, :string
+    field :article, :string
     field :quantity, :integer
     field :measure_unit, :string
 
@@ -13,7 +17,7 @@ defmodule Storage.OrderItem do
 
   def changeset(order_item, params \\ %{}) do
     order_item
-    |> Ecto.Changeset.cast(params, [:name, :quantity, :measure_unit])
-    |> Ecto.Changeset.validate_required([:name, :quantity, :measure_unit])
+    |> Changeset.cast(params, [:article, :quantity, :measure_unit])
+    |> Changeset.validate_required([:article, :quantity, :measure_unit])
   end
 end
