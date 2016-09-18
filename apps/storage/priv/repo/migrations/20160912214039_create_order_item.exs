@@ -3,7 +3,7 @@ defmodule Storage.Repo.Migrations.CreateOrderItem do
 
   def change do
     create table(:order_items) do
-      add :name, :string
+      add :article, :string
       add :quantity, :integer
       add :measure_unit, :string
 
