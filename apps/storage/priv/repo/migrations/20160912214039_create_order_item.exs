@@ -1,4 +1,6 @@
 defmodule Storage.Repo.Migrations.CreateOrderItem do
+  @moduledoc false
+
   use Ecto.Migration
 
   def change do

@@ -1,6 +1,7 @@
 defmodule SlackBot.Order do
   @moduledoc false
 
+  alias Ecto.Changeset
   alias Storage.OrderItem
   alias Storage.Repo
 
@@ -34,7 +35,9 @@ defmodule SlackBot.Order do
         Integer.parse(quantity)
       nil = Repo.get_by(OrderItem, article: article)
       {:ok, _} =
-        Repo.insert(OrderItem.changeset(%OrderItem{}, %{article: article, quantity: quantity, measure_unit: measure_unit}))
+        Repo.insert(OrderItem.changeset(
+          %OrderItem{},
+          %{article: article, quantity: quantity, measure_unit: measure_unit}))
       :ok
     else
       :error -> {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
@@ -50,7 +53,7 @@ defmodule SlackBot.Order do
       changeset =
         Repo.get_by!(OrderItem, article: article)
       {:ok, _} =
-        Repo.update(Ecto.Changeset.change(changeset, quantity: quantity))
+        Repo.update(Changeset.change(changeset, quantity: quantity))
       :ok
     else
       :error -> {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
