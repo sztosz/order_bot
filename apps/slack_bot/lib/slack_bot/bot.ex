@@ -13,24 +13,27 @@ defmodule SlackBot.Bot do
   end
 
   def handle_message(%{type: "message", text: "$ " <> "add " <> order} = message, slack) do
-    case Order.add(order) do
+    respond(Order.add(order), message, slack)
+  end
+
+  def handle_message(%{type: "message", text: "$ " <> "change " <> order} = message, slack) do
+    respond(Order.change(order), message, slack)
+  end
+
+  def handle_message(%{type: "message", text: "$ " <> "remove " <> order} = message, slack) do
+    respond(Order.remove(order), message, slack)
+  end
+
+  def handle_message(_, _), do: :ok
+
+  defp respond(result, message, slack) do
+    case result do
       :ok ->
         send_message("Ok, Jose!", message.channel, slack)
       {:error, response} ->
         send_message(response, message.channel, slack)
     end
   end
-
-  def handle_message(%{type: "message", text: "$ " <> "change " <> order} = message, slack) do
-      case Order.change(order) do
-        :ok ->
-          send_message("Ok, Jose!", message.channel, slack)
-        {:error, response} ->
-          send_message(response, message.channel, slack)
-      end
-    end
-
-  def handle_message(_, _), do: :ok
 
   defp row_to_string(row) do
     "#{row.article} #{row.quantity} #{row.measure_unit}"

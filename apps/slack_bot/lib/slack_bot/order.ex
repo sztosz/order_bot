@@ -15,7 +15,7 @@ defmodule SlackBot.Order do
     case String.split(order) do
         [article, quantity, measure_unit] ->
           add(article, quantity, measure_unit)
-        [_ | _] ->
+        [_ |_ ] ->
           {:error, "I did not understand"}
     end
   end
@@ -24,8 +24,17 @@ defmodule SlackBot.Order do
     case String.split(order) do
       [article, quantity] ->
         change(article, quantity)
-      [_ | _] ->
+      [_ |_ ] ->
         {:error, "I did not understand"}
+    end
+  end
+
+  def remove(order) do
+    case String.split(order) do
+      [article] ->
+        remove_article(article)
+      [_ |_ ] ->
+        {:error, "When removing from order write product name without additional text after space"}
     end
   end
 
@@ -50,15 +59,30 @@ defmodule SlackBot.Order do
     happy_path do
       {quantity, _} =
         Integer.parse(quantity)
-      changeset =
-        Repo.get_by!(OrderItem, article: article)
+      order_item =
+        Repo.get_by(OrderItem, article: article)
+      false = is_nil(order_item)
       {:ok, _} =
-        Repo.update(Changeset.change(changeset, quantity: quantity))
+        Repo.update(Changeset.change(order_item, quantity: quantity))
       :ok
     else
       :error -> {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
       {:error, _} -> {:eror, "Updating went wrong"}
-      nil -> {:eror, "Can't update #{article} because it hasn't been added yet"}
+      true -> {:error, "Can't update #{article} because it hasn't been added yet"}
+    end
+  end
+
+  defp remove_article(article) do
+    happy_path do
+      order_item =
+        Repo.get_by(OrderItem, article: article)
+      false = is_nil(order_item)
+      {:ok, _} =
+        Repo.delete(order_item)
+      :ok
+    else
+      {:error, _} -> {:eror, "Deleting went wrong"}
+      true -> {:error, "Can't delete #{article} because it hasn't been added yet"}
     end
   end
 end
