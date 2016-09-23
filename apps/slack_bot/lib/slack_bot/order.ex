@@ -15,7 +15,7 @@ defmodule SlackBot.Order do
     case String.split(order) do
         [article, quantity, measure_unit] ->
           add(article, quantity, measure_unit)
-        [_ |_ ] ->
+        [_|_] ->
           {:error, "I did not understand"}
     end
   end
@@ -24,7 +24,7 @@ defmodule SlackBot.Order do
     case String.split(order) do
       [article, quantity] ->
         change(article, quantity)
-      [_ |_ ] ->
+      [_|_] ->
         {:error, "I did not understand"}
     end
   end
@@ -33,7 +33,7 @@ defmodule SlackBot.Order do
     case String.split(order) do
       [article] ->
         remove_article(article)
-      [_ |_ ] ->
+      [_|_] ->
         {:error, "When removing from order write product name without additional text after space"}
     end
   end
