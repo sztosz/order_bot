@@ -4,6 +4,8 @@ defmodule Storage.OrderItem do
   use Ecto.Schema
 
   alias Ecto.Changeset
+  alias Storage.Repo
+
 
   schema "order_items" do
     field :article, :string
@@ -19,5 +21,14 @@ defmodule Storage.OrderItem do
     order_item
     |> Changeset.cast(params, [:article, :quantity, :measure_unit])
     |> Changeset.validate_required([:article, :quantity, :measure_unit])
+  end
+
+  def get_by_article(article) do
+    case Repo.get_by(__MODULE__, article: article) do
+      nil ->
+        {:error, 'Not found'}
+      order_item ->
+        {:ok, order_item}
+    end
   end
 end
