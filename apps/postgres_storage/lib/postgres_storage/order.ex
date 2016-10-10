@@ -32,8 +32,8 @@ defmodule PostgresStorage.Order do
   end
 
   defp new do
-    __MODULE__
-    |> changeset(closed: false, sent: false)
+    %__MODULE__{}
+    |> changeset(%{closed: false, sent: false})
     |> Repo.insert
   end
 end

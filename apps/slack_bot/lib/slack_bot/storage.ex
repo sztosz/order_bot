@@ -15,12 +15,13 @@ defmodule SlackBot.Storage do
   def add(article, quantity, measure_unit) do
     happy_path do
       {:error, _} = OrderItem.get_by_article(article)
-      {:ok, _} = Repo.insert(OrderItem.changeset(
-                   %OrderItem{},
-                   %{article: article, quantity: quantity, measure_unit: measure_unit}))
+      {:ok, order} = Order.opened
+      {:ok, _} = Repo.insert(Ecto.build_assoc(order,
+                                                :order_items,
+                                                %{article: article, quantity: quantity, measure_unit: measure_unit}))
       :ok
     else
-      %{article: _} -> {:error, "Exists"}
+      {:ok, [_|_]} -> {:error, "Exists"} # Change this to match
       {:error, message} -> {:error, message}
     end
   end
