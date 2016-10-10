@@ -1,18 +1,20 @@
-defmodule Storage.OrderItem do
+defmodule PostgresStorage.OrderItem do
   @moduledoc false
 
   use Ecto.Schema
 
   alias Ecto.Changeset
-  alias Storage.Repo
+  alias PostgresStorage.Repo
+  alias PostgresStorage.Order
 
+  import Ecto.Query
 
   schema "order_items" do
     field :article, :string
     field :quantity, :integer
     field :measure_unit, :string
 
-    field :deleted_at, Ecto.DateTime
+    belongs_to :order, Order
 
     timestamps
   end
@@ -24,11 +26,19 @@ defmodule Storage.OrderItem do
   end
 
   def get_by_article(article) do
-    case Repo.get_by(__MODULE__, article: article) do
-      nil ->
-        {:error, 'Not found'}
+    query = from oi in from_opened_order,
+              where: oi.article == ^article
+    case Repo.all(query) do
+      [] ->
+        {:error, "Not found"}
       order_item ->
         {:ok, order_item}
     end
+  end
+
+  def from_opened_order do
+    from oi in __MODULE__,
+      join: o in Order,
+      where: o.closed == false
   end
 end

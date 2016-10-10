@@ -1,20 +1,19 @@
 defmodule SlackBot.Order do
   @moduledoc false
 
-  alias Ecto.Changeset
-  alias Storage.OrderItem
-  alias Storage.Repo
-
   import Happy
+  alias SlackBot.Storage
 
   def show do
-    Repo.all(OrderItem)
+    Storage.show
+    |> Enum.map(&row_to_string(&1))
+    |> Enum.join("\n")
   end
 
   def add(order) do
     case String.split(order) do
-        [article, quantity, measure_unit] -> add(article, quantity, measure_unit)
-        [_|_] -> {:error, "I did not understand"}
+      [article, quantity, measure_unit] -> add(article, quantity, measure_unit)
+      [_|_] -> {:error, "I did not understand"}
     end
   end
 
@@ -35,39 +34,45 @@ defmodule SlackBot.Order do
   defp add(article, quantity, measure_unit) do
     happy_path do
       {quantity, _} = Integer.parse(quantity)
-      nil = Repo.get_by(OrderItem, article: article)
-      {:ok, _} = Repo.insert(OrderItem.changeset(
-                   %OrderItem{},
-                   %{article: article, quantity: quantity, measure_unit: measure_unit}))
+      :ok = Storage.add(article, quantity, measure_unit)
       :ok
     else
-      :error -> {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
-      {:error, _} -> {:error, "Inserting went wrong!"}
-      %{article: article} -> {:error, "Product #{article} has already been added "}
+      :error -> {:error, quantity_error(quantity)}
+      {:error, "Exists"} -> {:error, "Product #{article} has already been added, please `change` existing one "}
+      {:error, message} -> {:error, message}
     end
   end
 
   defp change(article, quantity) do
     happy_path do
       {quantity, _} = Integer.parse(quantity)
-      {:ok, order_item} =OrderItem.get_by_article(article)
-      {:ok, _} = Repo.update(Changeset.change(order_item, quantity: quantity))
+      :ok = Storage.change(article, quantity)
       :ok
     else
-      :error -> {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
-      {:error, 'Not found'} -> {:error, "Can't update #{article} because it hasn't been added yet"}
-      {:error, _} -> {:eror, "Updating went wrong"}
+      :error -> {:error, quantity_error(quantity)}
+      {:error, "Not Found"} -> not_exists_error(article, "update")
+      {:error, message} -> {:eror, message}
     end
   end
 
   defp remove_article(article) do
     happy_path do
-      {:ok, order_item} = OrderItem.get_by_article(article)
-      {:ok, _} = Repo.delete(order_item)
-      :ok
+      :ok = Storage.remove(article)
     else
-      {:error, 'Not found'} -> {:error, "Can't delete #{article} because it hasn't been added yet"}
-      {:error, _} -> {:eror, "Deleting went wrong"}
+      {:error, 'Not found'} -> non_exists_error(article, "remove")
+      {:error, message} -> {:eror, message}
     end
+  end
+
+  defp quantity_error(quantity) do
+    {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
+  end
+
+  defp not_exists_error(article, verb) do
+    {:error, "Can't #{verb} #{article} because it hasn't been added yet"}
+  end
+
+  defp row_to_string(row) do
+    "#{row.article} #{row.quantity} #{row.measure_unit}"
   end
 end

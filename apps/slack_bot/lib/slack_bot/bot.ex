@@ -7,8 +7,6 @@ defmodule SlackBot.Bot do
 
   def handle_message(%{type: "message", text: "$ " <> "show"} = message, slack) do
     Order.show
-    |> Enum.map(&row_to_string(&1))
-    |> Enum.join("\n")
     |> send_message(message.channel, slack)
   end
 
@@ -33,9 +31,5 @@ defmodule SlackBot.Bot do
       {:error, response} ->
         send_message(response, message.channel, slack)
     end
-  end
-
-  defp row_to_string(row) do
-    "#{row.article} #{row.quantity} #{row.measure_unit}"
   end
 end
