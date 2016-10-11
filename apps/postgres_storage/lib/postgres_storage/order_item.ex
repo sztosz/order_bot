@@ -28,8 +28,8 @@ defmodule PostgresStorage.OrderItem do
   def get_by_article(article) do
     query = from oi in from_opened_order,
               where: oi.article == ^article
-    case Repo.all(query) do
-      [] ->
+    case Repo.one(query) do
+      nil ->
         {:error, "Not found"}
       order_item ->
         {:ok, order_item}

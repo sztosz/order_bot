@@ -13,5 +13,7 @@ defmodule Storage.Repo.Migrations.CreateOrderItem do
 
       timestamps
     end
+
+    create unique_index(:order_items, [:article, :order_id])
   end
 end

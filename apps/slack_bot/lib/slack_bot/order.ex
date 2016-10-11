@@ -37,8 +37,8 @@ defmodule SlackBot.Order do
       :ok = Storage.add(article, quantity, measure_unit)
       :ok
     else
-      :error -> {:error, quantity_error(quantity)}
-      {:error, "Exists"} -> {:error, "Product #{article} has already been added, please `change` existing one "}
+      :error -> quantity_error(quantity)
+      {:error, "Exists"} -> {:error, "Product `#{article}` has already been added, please `change` existing one "}
       {:error, message} -> {:error, message}
     end
   end
@@ -58,8 +58,9 @@ defmodule SlackBot.Order do
   defp remove_article(article) do
     happy_path do
       :ok = Storage.remove(article)
+      :ok
     else
-      {:error, 'Not found'} -> non_exists_error(article, "remove")
+      {:error, "Not Found"} -> not_exists_error(article, "remove")
       {:error, message} -> {:eror, message}
     end
   end
@@ -69,7 +70,7 @@ defmodule SlackBot.Order do
   end
 
   defp not_exists_error(article, verb) do
-    {:error, "Can't #{verb} #{article} because it hasn't been added yet"}
+    {:error, "Can't `#{verb}` `#{article}` because it hasn't been added yet"}
   end
 
   defp row_to_string(row) do

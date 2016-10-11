@@ -6,8 +6,7 @@ defmodule SlackBot.Bot do
   alias SlackBot.Order
 
   def handle_message(%{type: "message", text: "$ " <> "show"} = message, slack) do
-    Order.show
-    |> send_message(message.channel, slack)
+    send_message(Order.show, message.channel, slack)
   end
 
   def handle_message(%{type: "message", text: "$ " <> "add " <> order} = message, slack) do
