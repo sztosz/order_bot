@@ -9,6 +9,10 @@ defmodule SlackBot.Bot do
     respond(Order.show, message, slack)
   end
 
+  def handle_message(%{type: "message", text: "$ " <> "show all orders" <> order} = message, slack) do
+    respond(Order.show_all_orders, message, slack)
+  end
+
   def handle_message(%{type: "message", text: "$ " <> "show " <> order} = message, slack) do
     respond(Order.show(order), message, slack)
   end

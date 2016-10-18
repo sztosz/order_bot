@@ -11,9 +11,13 @@ defmodule SlackBot.Storage do
   def show(order) do
     case order do
       nil -> Repo.all(OrderItem.from_opened_order)
-      order when is_integer(order) -> Repo.all(OrderItem.from_opened_order)
+      order when is_integer(order) -> Repo.all(OrderItem.from_order(order))
       _ -> {:error, "Wrong argument `#{order}`"}
     end
+  end
+
+  def show_all_orders do
+    Repo.all(OrderItem)
   end
 
   def add(article, quantity, measure_unit) do

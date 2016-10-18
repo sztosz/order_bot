@@ -8,6 +8,11 @@ defmodule SlackBot.Order do
     show_order(order)
   end
 
+  def show_all_orders do
+    Storage.show_all_orders
+    |> parse_orders_list
+  end
+
   def add(order) do
     case String.split(order) do
       [article, quantity, measure_unit] -> add(article, quantity, measure_unit)
@@ -40,7 +45,7 @@ defmodule SlackBot.Order do
     case Storage.show(order) do
       nil -> {:error, "There is no opened orders"}
       {:error, message} -> {:error, message}
-      orders -> parse_orders(orders)
+      order -> parse_order(order)
     end
   end
 
@@ -90,13 +95,23 @@ defmodule SlackBot.Order do
     {:error, "Sorry `#{argument}` is not a valid argument"}
   end
 
-  defp row_to_string(row) do
+  defp parse_order(order) do
+    order
+    |> Enum.map(&order_row_to_string(&1))
+    |> Enum.join("\n")
+  end
+
+  defp parse_orders_list(orders) do
+    orders
+    |> Enum.map(&orders_list_row_to_string(&1))
+    |> Enum.join("\n")
+  end
+
+  defp order_row_to_string(row) do
     "#{row.article} #{row.quantity} #{row.measure_unit}"
   end
 
-  defp parse_orders(orders) do
-    orders
-    |> Enum.map(&row_to_string(&1))
-    |> Enum.join("\n")
-  end
+  defp orders_list_row_to_string(row) do
+   "ID: #{row.id} FROM: #{row.created_at} CLOSED: #{row.closed} SENT: #{row.sent}"
+ end
 end
