@@ -30,6 +30,7 @@ defmodule SlackBot.Mixfile do
   defp deps do
     [{:slack, "~> 0.7.0"},
      {:happy, "~> 1.3.1"},
-     {:websocket_client, git: "https://github.com/jeremyong/websocket_client"}]
+     {:websocket_client, git: "https://github.com/jeremyong/websocket_client"},
+     {:postgres_storage, in_umbrella: true}]
   end
 end

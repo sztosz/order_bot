@@ -1,4 +1,4 @@
-defmodule Storage do
+defmodule PostgresStorage do
   @moduledoc false
 
   use Application
@@ -12,12 +12,12 @@ defmodule Storage do
     children = [
       # Starts a worker by calling: Storage.Worker.start_link(arg1, arg2, arg3)
       # worker(Storage.Worker, [arg1, arg2, arg3]),
-      worker(Storage.Repo, [])
+      worker(PostgresStorage.Repo, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Storage.Supervisor]
+    opts = [strategy: :one_for_one, name: PostgresStorage.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

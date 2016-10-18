@@ -2,7 +2,7 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-config :storage, Storage.Repo,
+config :postgres_storage, PostgresStorage.Repo,
   adapter: Ecto.Adapters.Postgres,
   database: "storage_repo",
   username: "storage",
@@ -36,4 +36,4 @@ config :storage, Storage.Repo,
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
-config :storage, ecto_repos: [Storage.Repo]
+config :postgres_storage, ecto_repos: [PostgresStorage.Repo]
