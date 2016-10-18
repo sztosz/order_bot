@@ -41,4 +41,10 @@ defmodule PostgresStorage.OrderItem do
       join: o in Order,
       where: o.closed == false
   end
+
+  def from_order(order) when is_integer(order) do
+    from oi in __MODULE__,
+      join: o in Order,
+      where: o.id == ^order
+  end
 end

@@ -8,8 +8,12 @@ defmodule SlackBot.Storage do
   alias PostgresStorage.OrderItem
   alias PostgresStorage.Repo
 
-  def show do
-    Repo.all(OrderItem.from_opened_order)
+  def show(order) do
+    case order do
+      nil -> Repo.all(OrderItem.from_opened_order)
+      order when is_integer(order) -> Repo.all(OrderItem.from_opened_order)
+      _ -> {:error, "Wrong argument `#{order}`"}
+    end
   end
 
   def add(article, quantity, measure_unit) do
@@ -34,7 +38,7 @@ defmodule SlackBot.Storage do
       :ok
     else
       {:error, "Not found"} -> {:error, "Not Found"}
-      {:error, message} -> {:eror, message}
+      {:error, message} -> {:error, message}
     end
   end
 
@@ -45,7 +49,7 @@ defmodule SlackBot.Storage do
       :ok
     else
       {:error, "Not found"} -> {:error, "Not Found"}
-      {:error, message} -> {:eror, message}
+      {:error, message} -> {:error, message}
     end
   end
 end

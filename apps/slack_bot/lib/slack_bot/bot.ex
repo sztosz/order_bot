@@ -6,7 +6,11 @@ defmodule SlackBot.Bot do
   alias SlackBot.Order
 
   def handle_message(%{type: "message", text: "$ " <> "show"} = message, slack) do
-    send_message(Order.show, message.channel, slack)
+    respond(Order.show, message, slack)
+  end
+
+  def handle_message(%{type: "message", text: "$ " <> "show " <> order} = message, slack) do
+    respond(Order.show(order), message, slack)
   end
 
   def handle_message(%{type: "message", text: "$ " <> "add " <> order} = message, slack) do
@@ -19,6 +23,14 @@ defmodule SlackBot.Bot do
 
   def handle_message(%{type: "message", text: "$ " <> "remove " <> order} = message, slack) do
     respond(Order.remove(order), message, slack)
+  end
+
+  def handle_message(%{type: "message", text: "$ " <> "close order"} = message, slack) do
+    respond(Order.send, message, slack)
+  end
+
+  def handle_message(%{type: "message", text: "$ " <> "send order " <> order} = message, slack) do
+    respond(Order.send(order), message, slack)
   end
 
   def handle_message(_, _), do: :ok

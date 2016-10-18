@@ -4,10 +4,8 @@ defmodule SlackBot.Order do
   import Happy
   alias SlackBot.Storage
 
-  def show do
-    Storage.show
-    |> Enum.map(&row_to_string(&1))
-    |> Enum.join("\n")
+  def show(order \\ nil) do
+    show_order(order)
   end
 
   def add(order) do
@@ -28,6 +26,21 @@ defmodule SlackBot.Order do
     case String.split(order) do
       [article] -> remove_article(article)
       [_|_] -> {:error, "When removing from order write product name without additional text after space"}
+    end
+  end
+
+  defp show_order(order) when is_binary(order) do
+    case Integer.parse(order) do
+      {order, _} -> show_order(order)
+      :error -> {:error, argument_error(order)}
+    end
+  end
+
+  defp show_order(order) do
+    case Storage.show(order) do
+      nil -> {:error, "There is no opened orders"}
+      {:error, message} -> {:error, message}
+      orders -> parse_orders(orders)
     end
   end
 
@@ -73,7 +86,17 @@ defmodule SlackBot.Order do
     {:error, "Can't `#{verb}` `#{article}` because it hasn't been added yet"}
   end
 
+  def argument_error(argument) do
+    {:error, "Sorry `#{argument}` is not a valid argument"}
+  end
+
   defp row_to_string(row) do
     "#{row.article} #{row.quantity} #{row.measure_unit}"
+  end
+
+  defp parse_orders(orders) do
+    orders
+    |> Enum.map(&row_to_string(&1))
+    |> Enum.join("\n")
   end
 end
