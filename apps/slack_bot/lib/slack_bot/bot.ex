@@ -5,12 +5,12 @@ defmodule SlackBot.Bot do
 
   alias SlackBot.Order
 
-  def handle_message(%{type: "message", text: "$ " <> "show"} = message, slack) do
-    respond(Order.show, message, slack)
+  def handle_message(%{type: "message", text: "$ " <> "show all" <> order} = message, slack) do
+    respond(Order.show_all_orders, message, slack)
   end
 
-  def handle_message(%{type: "message", text: "$ " <> "show all orders" <> order} = message, slack) do
-    respond(Order.show_all_orders, message, slack)
+  def handle_message(%{type: "message", text: "$ " <> "show"} = message, slack) do
+    respond(Order.show, message, slack)
   end
 
   def handle_message(%{type: "message", text: "$ " <> "show " <> order} = message, slack) do
@@ -40,9 +40,12 @@ defmodule SlackBot.Bot do
   def handle_message(_, _), do: :ok
 
   defp respond(result, message, slack) do
+    IO.inspect(result)
     case result do
       :ok ->
         send_message("Ok, Jose!", message.channel, slack)
+      {:ok, response} ->
+        send_message(response, message.channel, slack)
       {:error, response} ->
         send_message(response, message.channel, slack)
     end

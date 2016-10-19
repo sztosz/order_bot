@@ -17,7 +17,7 @@ defmodule SlackBot.Storage do
   end
 
   def show_all_orders do
-    Repo.all(OrderItem)
+    Repo.all(Order)
   end
 
   def add(article, quantity, measure_unit) do

@@ -38,13 +38,13 @@ defmodule PostgresStorage.OrderItem do
 
   def from_opened_order do
     from oi in __MODULE__,
-      join: o in Order,
+      join: o in Order, on: oi.order_id == o.id,
       where: o.closed == false
   end
 
   def from_order(order) when is_integer(order) do
     from oi in __MODULE__,
-      join: o in Order,
+      join: o in Order, on: oi.order_id == o.id,
       where: o.id == ^order
   end
 end

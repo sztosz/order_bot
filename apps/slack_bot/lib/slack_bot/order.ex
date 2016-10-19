@@ -9,8 +9,10 @@ defmodule SlackBot.Order do
   end
 
   def show_all_orders do
-    Storage.show_all_orders
-    |> parse_orders_list
+    case Storage.show_all_orders do
+      nil -> {:ok, "There are no orders"}
+      orders -> {:ok, parse_orders_list(orders)}
+    end
   end
 
   def add(order) do
@@ -35,17 +37,19 @@ defmodule SlackBot.Order do
   end
 
   defp show_order(order) when is_binary(order) do
+    IO.inspect order
     case Integer.parse(order) do
       {order, _} -> show_order(order)
-      :error -> {:error, argument_error(order)}
+      :error -> argument_error(order)
     end
   end
 
   defp show_order(order) do
+    IO.inspect order
     case Storage.show(order) do
       nil -> {:error, "There is no opened orders"}
       {:error, message} -> {:error, message}
-      order -> parse_order(order)
+      order -> {:ok, parse_order(order)}
     end
   end
 
@@ -112,6 +116,6 @@ defmodule SlackBot.Order do
   end
 
   defp orders_list_row_to_string(row) do
-   "ID: #{row.id} FROM: #{row.created_at} CLOSED: #{row.closed} SENT: #{row.sent}"
+   "ID: #{row.id} FROM: #{row.inserted_at} CLOSED: #{row.closed} SENT: #{row.sent}"
  end
 end
