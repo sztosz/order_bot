@@ -25,6 +25,15 @@ defmodule PostgresStorage.OrderItem do
     |> Changeset.validate_required([:article, :quantity, :measure_unit])
   end
 
+  def get_by_id(id) do
+    case OrderItem.get(id) do
+      nil ->
+        {:error, "Not found"}
+      order ->
+        {:ok, order}
+    end
+  end
+
   def get_by_article(article) do
     query = from oi in from_opened_order,
               where: oi.article == ^article

@@ -15,38 +15,50 @@ defmodule SlackBot.Order do
     end
   end
 
-  def add(order) do
-    case String.split(order) do
+  def add(order_item) do
+    case String.split(order_item) do
       [article, quantity, measure_unit] -> add(article, quantity, measure_unit)
       [_|_] -> {:error, "I did not understand"}
     end
   end
 
-  def change(order) do
-    case String.split(order) do
+  def change(order_item) do
+    case String.split(order_item) do
       [article, quantity] -> change(article, quantity)
       [_|_] -> {:error, "I did not understand"}
     end
   end
 
-  def remove(order) do
-    case String.split(order) do
+  def remove(order_item) do
+    case String.split(order_item) do
       [article] -> remove_article(article)
       [_|_] -> {:error, "When removing from order write product name without additional text after space"}
     end
   end
 
+  def close(order \\ nil) do
+    close_order(order)
+  end
+
+  def relay(args) do
+    case String.split(args) do
+      # Pattern matching hacks for dealing with slack auto transforming user handlers
+      [id, person] -> relay_order(id, person)
+      [person] -> relay_order(nil, person)
+      _ -> {:error, "Wrong arguments"}
+    end
+  end
+
+
   defp show_order(order) when is_binary(order) do
-    IO.inspect order
     case Integer.parse(order) do
-      {order, _} -> show_order(order)
+      {id, _} -> show_order(id)
       :error -> argument_error(order)
     end
   end
 
-  defp show_order(order) do
-    IO.inspect order
-    case Storage.show(order) do
+  defp show_order(id) do
+    case Storage.show(id) do
       nil -> {:error, "There is no opened orders"}
       {:error, message} -> {:error, message}
       order -> {:ok, parse_order(order)}
@@ -87,6 +99,38 @@ defmodule SlackBot.Order do
     end
   end
 
+  defp close_order(order) when is_binary(order) do
+    case Integer.parse(order) do
+      {id, _} -> close_order(id)
+      :error -> argument_error(order)
+    end
+  end
+
+  defp close_order(id) do
+    case Storage.close(id) do
+      nil -> {:error, "That order was not opened"}
+      {:error, message} -> {:error, message}
+      :ok -> {:ok, "Order was closed"}
+    end
+  end
+
+  defp relay_order(id, person) when is_binary(id) do
+    case Integer.parse(id) do
+      {id, _} -> relay_order(id, person)
+      :error -> argument_error(id)
+    end
+  end
+
+  defp relay_order(id, person) do
+    person = strip_person(person)
+    case show_order(id) do
+      {:error, message} ->
+        {:error, message}
+      {:ok, message} ->
+        # TODO: add logic to respond from SlackBot only when notification gets sent.
+        {:ok, person, message, "Order was sent"}
+    end
+  end
   defp quantity_error(quantity) do
     {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
   end
@@ -117,5 +161,11 @@ defmodule SlackBot.Order do
 
   defp orders_list_row_to_string(row) do
    "ID: #{row.id} FROM: #{row.inserted_at} CLOSED: #{row.closed} SENT: #{row.sent}"
- end
+  end
+
+  defp strip_person(person) do
+    person
+    |> String.trim_leading("<@")
+    |> String.trim_trailing(">")
+  end
 end

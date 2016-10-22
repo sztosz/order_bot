@@ -56,4 +56,15 @@ defmodule SlackBot.Storage do
       {:error, message} -> {:error, message}
     end
   end
+
+  def close(id) do
+    happy_path do
+      {:ok, order} = OrderItem.get_by_id(id)
+      {:ok, _} = Repo.update(Changeset.change(order, %{closed: true}))
+      :ok
+    else
+      {:error, "Not found"} -> {:error, "Not Found"}
+      {:error, message} -> {:error, message}
+    end
+  end
 end
