@@ -122,7 +122,6 @@ defmodule SlackBot.Order do
   end
 
   defp relay_order(id, person) do
-    person = strip_person(person)
     case show_order(id) do
       {:error, message} ->
         {:error, message}
@@ -161,11 +160,5 @@ defmodule SlackBot.Order do
 
   defp orders_list_row_to_string(row) do
    "ID: #{row.id} FROM: #{row.inserted_at} CLOSED: #{row.closed} SENT: #{row.sent}"
-  end
-
-  defp strip_person(person) do
-    person
-    |> String.trim_leading("<@")
-    |> String.trim_trailing(">")
   end
 end

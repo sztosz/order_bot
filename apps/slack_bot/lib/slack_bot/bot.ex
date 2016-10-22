@@ -40,7 +40,11 @@ defmodule SlackBot.Bot do
   def handle_message(%{type: "message", text: "$ " <> "relay order " <> args} = message, slack) do
     case Order.relay(args) do
       {:ok, person, notify_message, response} ->
-        notify(notify_message, person, response, message, slack)
+        person
+        |> String.trim_leading("<@")
+        |> String.trim_trailing(">")
+        |> normalize_person_to_user_handler(slack)
+        |> notify(notify_message, response, message, slack)
       response ->
         respond(response, message, slack)
     end
@@ -59,8 +63,22 @@ defmodule SlackBot.Bot do
     end
   end
 
-  defp notify(notify_message, person, response, message, slack) do
+  defp notify(person, notify_message, response, message, slack) do
     send_message(notify_message, "@" <> person, slack)
     send_message(response, message.channel, slack)
+  end
+
+  defp normalize_person_to_user_handler(person, slack) do
+    slack.users
+    |> Map.values
+    |> find_user_by_name_or_id(person)
+    |> Map.get(:name)
+  end
+
+  defp find_user_by_name_or_id(slack_user_map, person) do
+    case Enum.find(slack_user_map, fn user -> user.name == person end) do
+      nil -> Enum.find(slack_user_map, %{}, fn user -> user.id == person end)
+      handle -> handle
+    end
   end
 end
