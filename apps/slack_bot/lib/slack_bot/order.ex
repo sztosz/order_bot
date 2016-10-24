@@ -42,7 +42,6 @@ defmodule SlackBot.Order do
 
   def relay(args) do
     case String.split(args) do
-      # Pattern matching hacks for dealing with slack auto transforming user handlers
       [id, person] -> relay_order(id, person)
       [person] -> relay_order(nil, person)
       _ -> {:error, "Wrong arguments"}
@@ -53,7 +52,7 @@ defmodule SlackBot.Order do
   defp show_order(order) when is_binary(order) do
     case Integer.parse(order) do
       {id, _} -> show_order(id)
-      :error -> argument_error(order)
+      :error -> {:error, argument_error(order)}
     end
   end
 
@@ -71,7 +70,7 @@ defmodule SlackBot.Order do
       :ok = Storage.add(article, quantity, measure_unit)
       :ok
     else
-      :error -> quantity_error(quantity)
+      :error -> {:error, quantity_error(quantity)}
       {:error, "Exists"} -> {:error, "Product `#{article}` has already been added, please `change` existing one "}
       {:error, message} -> {:error, message}
     end
@@ -84,8 +83,8 @@ defmodule SlackBot.Order do
       :ok
     else
       :error -> {:error, quantity_error(quantity)}
-      {:error, "Not Found"} -> not_exists_error(article, "update")
-      {:error, message} -> {:eror, message}
+      {:error, "Not Found"} -> {:error, not_exists_error(article, "update")}
+      {:error, message} -> {:error, message}
     end
   end
 
@@ -94,15 +93,15 @@ defmodule SlackBot.Order do
       :ok = Storage.remove(article)
       :ok
     else
-      {:error, "Not Found"} -> not_exists_error(article, "remove")
-      {:error, message} -> {:eror, message}
+      {:error, "Not Found"} -> {:error, not_exists_error(article, "remove")}
+      {:error, message} -> {:error, message}
     end
   end
 
   defp close_order(order) when is_binary(order) do
     case Integer.parse(order) do
       {id, _} -> close_order(id)
-      :error -> argument_error(order)
+      :error -> {:error, argument_error(order)}
     end
   end
 
@@ -117,7 +116,7 @@ defmodule SlackBot.Order do
   defp relay_order(id, person) when is_binary(id) do
     case Integer.parse(id) do
       {id, _} -> relay_order(id, person)
-      :error -> argument_error(id)
+      :error -> {:error, argument_error(id)}
     end
   end
 
@@ -130,16 +129,17 @@ defmodule SlackBot.Order do
         {:ok, person, message, "Order was sent"}
     end
   end
+
   defp quantity_error(quantity) do
-    {:error, "Product quantity has to be an Integer, and you wrote `#{quantity}` "}
+    "Product quantity has to be an Integer, and you wrote `#{quantity}` "
   end
 
   defp not_exists_error(article, verb) do
-    {:error, "Can't `#{verb}` `#{article}` because it hasn't been added yet"}
+    "Can't `#{verb}` `#{article}` because it hasn't been added yet"
   end
 
   def argument_error(argument) do
-    {:error, "Sorry `#{argument}` is not a valid argument"}
+    "Sorry `#{argument}` is not a valid argument"
   end
 
   defp parse_order(order) do
